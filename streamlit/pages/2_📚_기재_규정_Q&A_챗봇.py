@@ -84,8 +84,6 @@ if st.session_state.get("already_saved"):
     st.info("⚠️ 이미 즐겨찾기에 추가된 답변입니다.")
     st.session_state.already_saved = False
 
-
-
 favorites = get_favorites()
 selected_fav = st.sidebar.selectbox("⭐ 즐겨찾기한 Q&A", favorites, format_func=lambda row: row[1])
 

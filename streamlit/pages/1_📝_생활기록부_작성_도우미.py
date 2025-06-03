@@ -1,4 +1,9 @@
 import streamlit as st
+import sqlite3
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+from QAchatbot_BE.rag_favorite_db import init_favorites_db, save_favorite, get_favorites, delete_favorite
 
 st.set_page_config(page_title="생기부 문장 생성기", layout="wide")
 
@@ -50,10 +55,22 @@ if "generated" in st.session_state and st.session_state.generated:
     """, unsafe_allow_html=True)
 
 # 즐겨찾기 툴바 형태 사이드 출력
-with st.sidebar:
-    st.markdown("### ⭐ 즐겨찾기한 기재 요령")
-    if "favorites" in st.session_state and st.session_state.favorites:
-        for i, fav in enumerate(st.session_state.favorites):
-            st.markdown(f"- {fav}")
-    else:
-        st.info("즐겨찾기한 항목이 없습니다. Q&A 페이지에서 추가해보세요.")
+favorites = get_favorites()
+selected_fav = st.sidebar.selectbox("⭐ 즐겨찾기한 Q&A", favorites, format_func=lambda row: row[1])
+
+if selected_fav:
+    fav_id = selected_fav[0]
+    conn = sqlite3.connect("favorites.db")
+    c = conn.cursor()
+    c.execute("SELECT question, answer FROM favorites WHERE id = ?", (fav_id,))
+    q, a = c.fetchone()
+    conn.close()
+
+    with st.sidebar.expander("📌 저장된 답변 보기", expanded=False):
+        st.markdown(f"**Q. {q}**")
+        st.markdown(a)
+
+        if st.button("🗑️ 삭제하기", key=f"delete_{fav_id}"):
+            delete_favorite(fav_id)
+            st.toast("🗑️ 즐겨찾기가 삭제되었습니다.")
+            st.rerun()
