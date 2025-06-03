@@ -1,0 +1,394 @@
+[
+  {
+    "table": "student",
+    "column": [
+      {
+        "column_name": "student_id",
+        "column_type": "UUID",
+        "PK": 1,
+        "FK": null,
+        "description": "학생의 고유 식별자입니다."
+      },
+      {
+        "column_name": "name",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "학생의 이름입니다."
+      },
+      {
+        "column_name": "birth_date",
+        "column_type": "DATE",
+        "PK": 0,
+        "FK": null,
+        "description": "학생의 생년월일입니다."
+      },
+      {
+        "column_name": "grade",
+        "column_type": "INTEGER",
+        "PK": 0,
+        "FK": null,
+        "description": "학생의 학년입니다."
+      },
+      {
+        "column_name": "class",
+        "column_type": "INTEGER",
+        "PK": 0,
+        "FK": null,
+        "description": "학생이 속한 반입니다."
+      },
+      {
+        "column_name": "number",
+        "column_type": "INTEGER",
+        "PK": 0,
+        "FK": null,
+        "description": "학생의 번호입니다."
+      },
+      {
+        "column_name": "gender",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "학생의 성별입니다."
+      },
+      {
+        "column_name": "enrollment_year",
+        "column_type": "INTEGER",
+        "PK": 0,
+        "FK": null,
+        "description": "학생의 입학 연도입니다."
+      }
+    ]
+  },
+  {
+    "table": "club",
+    "column": [
+      {
+        "column_name": "club_id",
+        "column_type": "UUID",
+        "PK": 1,
+        "FK": null,
+        "description": "동아리의 고유 식별자입니다."
+      },
+      {
+        "column_name": "name",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "동아리의 이름입니다."
+      },
+      {
+        "column_name": "teacher",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "동아리를 담당하는 교사의 이름입니다."
+      },
+      {
+        "column_name": "description",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "동아리에 대한 설명입니다."
+      }
+    ]
+  },
+  {
+    "table": "activity",
+    "column": [
+      {
+        "column_name": "activity_id",
+        "column_type": "UUID",
+        "PK": 1,
+        "FK": null,
+        "description": "활동의 고유 식별자입니다."
+      },
+      {
+        "column_name": "student_id",
+        "column_type": "UUID",
+        "PK": 0,
+        "FK": {
+          "to_table": "student",
+          "to_column": "student_id"
+        },
+        "description": "활동에 참여한 학생의 식별자입니다."
+      },
+      {
+        "column_name": "activity_type",
+        "column_type": "activity_type_enum",
+        "PK": 0,
+        "FK": null,
+        "description": "활동의 유형입니다. 가능한 값: '자율', '동아리', '진로', '특기적성'."
+      },
+      {
+        "column_name": "title",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "활동의 제목입니다."
+      },
+      {
+        "column_name": "description",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "활동에 대한 설명입니다."
+      },
+      {
+        "column_name": "activity_date",
+        "column_type": "DATE",
+        "PK": 0,
+        "FK": null,
+        "description": "활동이 시작된 날짜입니다."
+      },
+      {
+        "column_name": "end_date",
+        "column_type": "DATE",
+        "PK": 0,
+        "FK": null,
+        "description": "활동이 종료된 날짜입니다."
+      },
+      {
+        "column_name": "club_id",
+        "column_type": "UUID",
+        "PK": 0,
+        "FK": {
+          "to_table": "club",
+          "to_column": "club_id"
+        },
+        "description": "활동과 관련된 동아리의 식별자입니다. 선택 사항입니다."
+      }
+    ]
+  },
+  {
+    "table": "award",
+    "column": [
+      {
+        "column_name": "award_id",
+        "column_type": "UUID",
+        "PK": 1,
+        "FK": null,
+        "description": "수상의 고유 식별자입니다."
+      },
+      {
+        "column_name": "student_id",
+        "column_type": "UUID",
+        "PK": 0,
+        "FK": {
+          "to_table": "student",
+          "to_column": "student_id"
+        },
+        "description": "수상한 학생의 식별자입니다."
+      },
+      {
+        "column_name": "award_name",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "수상의 이름입니다."
+      },
+      {
+        "column_name": "awarding_body",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "수여 기관의 이름입니다."
+      },
+      {
+        "column_name": "award_level",
+        "column_type": "award_level_enum",
+        "PK": 0,
+        "FK": null,
+        "description": "수상의 수준입니다. 가능한 값: '교내', '교외'."
+      },
+      {
+        "column_name": "award_date",
+        "column_type": "DATE",
+        "PK": 0,
+        "FK": null,
+        "description": "수상 날짜입니다."
+      },
+      {
+        "column_name": "description",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "수상에 대한 설명입니다."
+      }
+    ]
+  },
+  {
+    "table": "grade",
+    "column": [
+      {
+        "column_name": "grade_id",
+        "column_type": "UUID",
+        "PK": 1,
+        "FK": null,
+        "description": "성적의 고유 식별자입니다."
+      },
+      {
+        "column_name": "student_id",
+        "column_type": "UUID",
+        "PK": 0,
+        "FK": {
+          "to_table": "student",
+          "to_column": "student_id"
+        },
+        "description": "성적이 속한 학생의 식별자입니다."
+      },
+      {
+        "column_name": "semester",
+        "column_type": "semester_enum",
+        "PK": 0,
+        "FK": null,
+        "description": "학기 정보입니다. 가능한 값: '1학기', '2학기'."
+      },
+      {
+        "column_name": "year",
+        "column_type": "INTEGER",
+        "PK": 0,
+        "FK": null,
+        "description": "해당 성적의 연도입니다."
+      },
+      {
+        "column_name": "subject",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "과목 이름입니다."
+      },
+      {
+        "column_name": "score",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "성적 점수입니다."
+      },
+      {
+        "column_name": "description",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "성적에 대한 설명입니다."
+      }
+    ]
+  },
+  {
+    "table": "subject_detail",
+    "column": [
+        {
+        "column_name": "detail_id",
+        "column_type": "UUID",
+        "PK": 1,
+        "FK": null,
+        "description": "과목 세부 사항의 고유 식별자입니다."
+        },
+        {
+        "column_name": "student_id",
+        "column_type": "UUID",
+        "PK": 0,
+        "FK": {
+            "to_table": "student",
+            "to_column": "student_id"
+        },
+        "description": "해당 세부 사항이 속한 학생의 식별자입니다."
+        },
+        {
+        "column_name": "grade_id",
+        "column_type": "UUID",
+        "PK": 0,
+        "FK": {
+            "to_table": "grade",
+            "to_column": "grade_id"
+        },
+        "description": "해당 세부 사항이 속한 성적의 식별자입니다."
+        },
+        {
+        "column_name": "subject",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "과목 이름입니다."
+        },
+        {
+        "column_name": "semester",
+        "column_type": "semester_enum",
+        "PK": 0,
+        "FK": null,
+        "description": "수업이 진행된 학기 정보입니다."
+        },
+        {
+        "column_name": "year",
+        "column_type": "INTEGER",
+        "PK": 0,
+        "FK": null,
+        "description": "수업이 진행된 연도 정보입니다."
+        },
+        {
+        "column_name": "category",
+        "column_type": "category_enum",
+        "PK": 0,
+        "FK": null,
+        "description": "세부 사항의 범주입니다. 가능한 값: '독서', '수행평가', '발표', '활동'."
+        },
+        {
+        "column_name": "description",
+        "column_type": "TEXT",
+        "PK": 0,
+        "FK": null,
+        "description": "과목의 세부 사항 및 내용에 대한 설명입니다."
+        }
+    ]
+  },
+  {
+  "table": "volunteer",
+  "column": [
+    {
+      "column_name": "volunteer_id",
+      "column_type": "UUID",
+      "PK": 1,
+      "FK": null,
+      "description": "봉사 활동의 고유 식별자입니다."
+    },
+    {
+      "column_name": "student_id",
+      "column_type": "UUID",
+      "PK": 0,
+      "FK": {
+        "to_table": "student",
+        "to_column": "student_id"
+      },
+      "description": "해당 봉사 활동을 수행한 학생의 식별자입니다."
+    },
+    {
+      "column_name": "organization",
+      "column_type": "TEXT",
+      "PK": 0,
+      "FK": null,
+      "description": "봉사 활동을 제공한 기관 또는 단체명입니다."
+    },
+    {
+      "column_name": "description",
+      "column_type": "TEXT",
+      "PK": 0,
+      "FK": null,
+      "description": "봉사 활동의 구체적인 내용입니다."
+    },
+    {
+      "column_name": "volunteer_date",
+      "column_type": "DATE",
+      "PK": 0,
+      "FK": null,
+      "description": "봉사 활동이 이루어진 날짜입니다."
+    },
+    {
+      "column_name": "hours",
+      "column_type": "FLOAT",
+      "PK": 0,
+      "FK": null,
+      "description": "해당 봉사 활동에서 수행한 시간(시간 단위)입니다."
+    }
+  ]
+ }
+]
