@@ -29,10 +29,17 @@ if "student_data" not in st.session_state:
     st.session_state.student_data = None
 if "user_query_cache" not in st.session_state:
     st.session_state.user_query_cache = ""
+if "last_failed_sql" not in st.session_state:
+    st.session_state.last_failed_sql = ""
+if "reasoning_cache" not in st.session_state:
+    st.session_state.reasoning_cache = ""
 
+# 메인 처리: 처음 "생활기록부 생성" 버튼 클릭 시
 if st.button("생활기록부 생성"):
     if user_query.strip():
-        st.session_state.life_record_candidates = []  # 새 쿼리일 경우 후보 초기화
+        st.session_state.life_record_candidates = []
+        st.session_state.student_data = None
+        st.session_state.last_failed_sql = ""
         st.session_state.user_query_cache = user_query
 
         with st.spinner("자연어를 SQL로 변환 중..."):
@@ -44,7 +51,7 @@ if st.button("생활기록부 생성"):
             reasoning = result.get("chain_of_thought_reasoning", "")
             sql_query = result.get("SQL", "")
 
-            # 🧠 사고 과정 출력
+            st.session_state.reasoning_cache = reasoning
             st.markdown("### 🧠 사고 과정 (Chain of Thought Reasoning)")
             st.write(reasoning)
 
@@ -62,16 +69,40 @@ if st.button("생활기록부 생성"):
                             columns = [desc[0] for desc in cursor.description]
                             data = [dict(zip(columns, row)) for row in rows]
 
-                            st.session_state.student_data = data  # 저장
+                            st.session_state.student_data = data
                             st.success(f"✅ {len(data)}건의 데이터를 조회했습니다.")
                             st.json(data)
 
                     except Exception as e:
+                        st.session_state.last_failed_sql = sql_query
                         st.error(f"❗ 쿼리 실행 실패: {e}")
-    else:
-        st.warning("질문을 먼저 입력해 주세요.")
 
-# 후보가 없고, 데이터가 있을 경우에만 생성
+# SQL 수정 후 재실행 UI
+if st.session_state.last_failed_sql:
+    st.markdown("### ⚠️ SQL 실행 실패 - 직접 수정해서 다시 시도해보세요.")
+    modified_sql = st.text_area("수정된 SQL 쿼리 입력:", value=st.session_state.last_failed_sql)
+
+    if st.button("쿼리 다시 실행"):
+        with st.spinner("수정된 SQL 실행 중..."):
+            try:
+                cursor.execute(modified_sql)
+                rows = cursor.fetchall()
+
+                if not rows:
+                    st.warning("🔍 해당 조건에 맞는 데이터가 없습니다.")
+                else:
+                    columns = [desc[0] for desc in cursor.description]
+                    data = [dict(zip(columns, row)) for row in rows]
+
+                    st.session_state.student_data = data
+                    st.session_state.last_failed_sql = ""  # 실패 기록 초기화
+                    st.success(f"✅ {len(data)}건의 데이터를 조회했습니다.")
+                    st.json(data)
+
+            except Exception as e:
+                st.error(f"❗ 수정된 쿼리 실행 실패: {e}")
+
+# 후보가 없고, 데이터가 있을 경우에만 LLM 문장 생성
 if (
     st.session_state.student_data
     and not st.session_state.life_record_candidates
@@ -87,7 +118,7 @@ if (
             for _ in range(3)
         ]
 
-# 후보가 있을 경우 라디오 버튼 표시
+# 생성된 문장 선택 UI
 if st.session_state.life_record_candidates:
     candidates = st.session_state.life_record_candidates
 
