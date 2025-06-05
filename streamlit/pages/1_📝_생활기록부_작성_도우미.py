@@ -122,6 +122,11 @@ if (
 if st.session_state.life_record_candidates:
     candidates = st.session_state.life_record_candidates
 
+    # ✅ 항상 데이터 표시
+    if st.session_state.student_data:
+        st.markdown("### 📊 조회된 학생 데이터")
+        st.json(st.session_state.student_data)
+
     selected = st.radio(
         "📄 생성된 생활기록부 후보 중 하나를 선택하세요:",
         options=candidates,
@@ -131,3 +136,4 @@ if st.session_state.life_record_candidates:
 
     st.subheader("✅ 선택된 생활기록부 문장")
     st.write(selected)
+
