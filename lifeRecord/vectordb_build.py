@@ -1,19 +1,20 @@
-import os
 import json
 import pandas as pd
 import chromadb
 from chromadb.utils import embedding_functions
+from pathlib import Path
 
 # === 경로 설정 ===
-DATA_DIR = "./data"
-SCHEMA_FILE = os.path.join(DATA_DIR, "lifeRecordSchema.json")
-FEWSHOT_FILE = os.path.join(DATA_DIR, "fewshot.jsonl")
-API_KEY_FILE = os.path.join(DATA_DIR, "api_key.txt")
-DB_PATH = "./vectordb/"
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+SCHEMA_FILE = DATA_DIR / "lifeRecordSchema.json"
+FEWSHOT_FILE = DATA_DIR / "fewshot.jsonl"
+API_KEY_FILE = DATA_DIR / "api_key.txt"
+DB_PATH = BASE_DIR / "vectordb"
 
 # === OpenAI API 키 로딩 ===
 def load_api_key(api_key_path):
-    with open(api_key_path, "r") as f:
+    with open(api_key_path, "r", encoding="utf-8") as f:
         return f.read().strip()
 
 OPENAI_API_KEY = load_api_key(API_KEY_FILE)
@@ -38,7 +39,7 @@ def save_column_descriptions(schema_file: str):
             })
             ids.append(f"col-{table_name}-{col_name}")
 
-    client = chromadb.PersistentClient(path=DB_PATH)
+    client = chromadb.PersistentClient(path=str(DB_PATH))
     openai_ef = embedding_functions.OpenAIEmbeddingFunction(
         api_key=OPENAI_API_KEY,
         model_name="text-embedding-3-small"
@@ -64,7 +65,7 @@ def save_fewshot_examples(fewshot_file: str):
 
     df = pd.DataFrame(records)
 
-    client = chromadb.PersistentClient(path=DB_PATH)
+    client = chromadb.PersistentClient(path=str(DB_PATH))
     openai_ef = embedding_functions.OpenAIEmbeddingFunction(
         api_key=OPENAI_API_KEY,
         model_name="text-embedding-3-small"

@@ -10,11 +10,11 @@
         "description": "student 테이블의 student_id 열로, 학생을 고유하게 식별하는 기본 키(PK) 역할을 하는 UUID 타입의 컬럼입니다."
       },
       {
-        "column_name": "name",
+        "column_name": "student_name",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "student 테이블의 name 열로, 학생의 이름을 저장하는 텍스트 타입의 컬럼입니다."
+        "description": "student 테이블의 student_name 열로, 학생의 이름을 저장하는 텍스트 타입의 컬럼입니다."
       },
       {
         "column_name": "birth_date",
@@ -38,11 +38,11 @@
         "description": "student 테이블의 class 열로, 학생이 소속된 반을 나타내는 정수형 컬럼입니다."
       },
       {
-        "column_name": "number",
+        "column_name": "student_number",
         "column_type": "INTEGER",
         "PK": 0,
         "FK": null,
-        "description": "student 테이블의 number 열로, 학생의 학급 내 번호를 나타내는 정수형 컬럼입니다."
+        "description": "student 테이블의 student_number 열로, 학생의 학급 내 번호를 나타내는 정수형 컬럼입니다."
       },
       {
         "column_name": "gender",
@@ -71,11 +71,11 @@
         "description": "club 테이블의 club_id 열로, 동아리를 고유하게 식별하는 기본 키(PK) 역할을 하는 UUID 타입의 컬럼입니다."
       },
       {
-        "column_name": "name",
+        "column_name": "club_name",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "club 테이블의 name 열로, 동아리의 이름을 저장하는 텍스트 타입의 컬럼입니다."
+        "description": "club 테이블의 club_name 열로, 동아리의 이름을 저장하는 텍스트 타입의 컬럼입니다."
       },
       {
         "column_name": "teacher",
@@ -85,11 +85,11 @@
         "description": "club 테이블의 teacher 열로, 동아리를 담당하는 교사의 이름을 저장하는 텍스트 타입의 컬럼입니다."
       },
       {
-        "column_name": "description",
+        "column_name": "club_description",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "club 테이블의 description 열로, 동아리에 대한 자세한 설명을 담는 텍스트 타입의 컬럼입니다."
+        "description": "club 테이블의 club_description 열로, 동아리에 대한 자세한 설명을 담는 텍스트 타입의 컬럼입니다."
       }
     ]
   },
@@ -121,18 +121,18 @@
         "description": "activity 테이블의 activity_type 열로, 활동의 유형을 나타내는 열이며, 가능한 값으로 '자율', '동아리', '진로', '특기적성'이 지정된 ENUM 타입입니다."
       },
       {
-        "column_name": "title",
+        "column_name": "activity_name",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "activity 테이블의 title 열로, 활동의 제목을 저장하는 텍스트 타입의 컬럼입니다."
+        "description": "activity 테이블의 activity_name 열로, 활동의 제목을 저장하는 텍스트 타입의 컬럼입니다."
       },
       {
-        "column_name": "description",
+        "column_name": "activity_description",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "activity 테이블의 description 열로, 활동에 대한 상세한 설명을 담는 텍스트 타입의 컬럼입니다."
+        "description": "activity 테이블의 activity_description 열로, 활동에 대한 상세한 설명을 담는 텍스트 타입의 컬럼입니다."
       },
       {
         "column_name": "activity_date",
@@ -157,6 +157,20 @@
           "to_column": "club_id"
         },
         "description": "activity 테이블의 club_id 열로, 해당 활동과 관련된 동아리를 참조하는 외래 키(FK)이며 club 테이블의 club_id와 연결됩니다. 선택적 컬럼입니다."
+      },
+      {
+      "column_name": "is_club",
+      "column_type": "BOOLEAN",
+      "PK": 0,
+      "FK": null,
+      "description": "activity 테이블의 is_club 열로, 해당 활동이 동아리 활동이면 TRUE, 그렇지 않으면 FALSE입니다. club_id와의 일관성을 위해 제약 조건(CONSTRAINT)이 존재합니다."
+      }
+    ],
+    "constraints": [
+      {
+        "type": "CHECK",
+        "expression": "(is_club = TRUE AND club_id IS NOT NULL) OR (is_club = FALSE AND club_id IS NULL)",
+        "description": "is_club 값에 따라 club_id가 존재하거나 NULL이어야 하는 제약 조건입니다."
       }
     ]
   },
@@ -209,11 +223,11 @@
         "description": "award 테이블의 award_date 열로, 수상한 날짜를 나타내는 날짜 타입의 컬럼입니다."
       },
       {
-        "column_name": "description",
+        "column_name": "award_description",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "award 테이블의 description 열로, 수상에 대한 상세 설명을 담는 텍스트 타입의 컬럼입니다."
+        "description": "award 테이블의 award_description 열로, 수상에 대한 상세 설명을 담는 텍스트 타입의 컬럼입니다."
       }
     ]
   },
@@ -276,13 +290,13 @@
   },
   {
   "table": "subject_detail",
-  "column": [
+    "column": [
       {
         "column_name": "detail_id",
         "column_type": "UUID",
         "PK": 1,
         "FK": null,
-        "description": "과목 세부 사항의 고유 식별자입니다."
+        "description": "subject_detail 테이블의 detail_id 열로, 과목 세부 사항을 고유하게 식별하는 기본 키(PK) 역할을 하는 UUID 타입의 컬럼입니다."
       },
       {
         "column_name": "student_id",
@@ -292,7 +306,7 @@
           "to_table": "student",
           "to_column": "student_id"
         },
-        "description": "해당 세부 사항이 속한 학생의 식별자입니다."
+        "description": "subject_detail 테이블의 student_id 열로, 해당 세부 사항이 속한 학생을 참조하는 외래 키(FK)이며 student 테이블의 student_id와 연결됩니다."
       },
       {
         "column_name": "grade_id",
@@ -302,42 +316,42 @@
           "to_table": "grade",
           "to_column": "grade_id"
         },
-        "description": "해당 세부 사항이 속한 성적의 식별자입니다."
+        "description": "subject_detail 테이블의 grade_id 열로, 해당 세부 사항이 속한 성적을 참조하는 외래 키(FK)이며 grade 테이블의 grade_id와 연결됩니다."
       },
       {
         "column_name": "subject",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "과목 이름입니다."
+        "description": "subject_detail 테이블의 subject 열로, 과목 이름을 저장하는 텍스트 타입의 컬럼입니다."
       },
       {
         "column_name": "semester",
         "column_type": "semester_enum",
         "PK": 0,
         "FK": null,
-        "description": "수업이 진행된 학기 정보입니다."
+        "description": "subject_detail 테이블의 semester 열로, 수업이 진행된 학기 정보를 나타내는 열입니다."
       },
       {
         "column_name": "year",
         "column_type": "INTEGER",
         "PK": 0,
         "FK": null,
-        "description": "수업이 진행된 연도 정보입니다."
+        "description": "subject_detail 테이블의 year 열로, 수업이 진행된 연도 정보를 나타내는 정수형 컬럼입니다."
       },
       {
         "column_name": "category",
         "column_type": "category_enum",
         "PK": 0,
         "FK": null,
-        "description": "세부 사항의 범주입니다. 가능한 값: '독서', '수행평가', '발표', '활동'."
+        "description": "subject_detail 테이블의 category 열로, 세부 사항의 범주를 나타내며, 가능한 값으로는 '독서', '수행평가', '발표', '활동' 등이 있습니다."
       },
       {
-        "column_name": "description",
+        "column_name": "subject_detail_description",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "과목의 세부 사항 및 내용에 대한 설명입니다."
+        "description": "subject_detail 테이블의 subject_detail_description 열로, 과목의 세부 사항 및 내용에 대한 설명을 담는 텍스트 타입의 컬럼입니다."
       }
     ]
   },
@@ -384,11 +398,11 @@
         "description": "volunteer 테이블의 volunteer_date 열로, 봉사활동을 수행한 날짜를 나타내는 날짜 타입의 컬럼입니다."
       },
       {
-        "column_name": "description",
+        "column_name": "volunteer_description",
         "column_type": "TEXT",
         "PK": 0,
         "FK": null,
-        "description": "volunteer 테이블의 description 열로, 봉사활동에 대한 상세 설명을 담는 텍스트 타입의 컬럼입니다."
+        "description": "volunteer 테이블의 volunteer_description 열로, 봉사활동에 대한 상세 설명을 담는 텍스트 타입의 컬럼입니다."
       }
     ]
   }

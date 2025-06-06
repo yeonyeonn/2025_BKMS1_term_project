@@ -33,53 +33,69 @@ def nlTosql(user_question):
         include_descriptions=True
     )
 
-    fewshots_text = get_relevant_fewshots(user_question, top_k=3)
+    fewshots_text = get_relevant_fewshots(user_question, top_k=2)
 
-    prompt_template = """   
-                        당신은 현재 생활기록부를 작성 중인 교사를 도와 필요한 데이터를 찾는 일을 수행하고 있습니다.
-                        생활기록부(학생생활기록부)는 대한민국 초·중·고 학생들의 학교 생활 전반을 공식적으로 기록하는 문서로, 
-                        교사들이 작성하며 대학 입시나 취업 시 중요한 평가 자료로 활용됩니다.
-                        학생의 활동, 교과 성적, 수상, 봉사 등 모든 정보가 빠짐없이 잘 반영되도록 적절한 데이터를 추출하는 것이 매우 중요합니다.
+    prompt_template =   """
+                        당신은 대한민국 학생생활기록부를 작성하는 교사를 도와, 필요한 데이터를 데이터베이스에서 정확히 추출하는 역할을 맡고 있습니다.
 
-                        아래에 데이터베이스 스키마와 사용자의 질문 혹은 명령이 주어집니다.
-                        스키마를 꼼꼼히 분석하여 사용자의 의도를 정확히 이해한 후, 생활기록부 작성에 필요한 데이터를 찾기 위한 최적의 SQLite 쿼리를 작성하세요.
-                        쿼리 작성 전, 사용자가 요구하는 조건(예: 학년, 학기, 활동 유형, 동아리명, 과목명 등)을 단계별로 분석하며 사고 과정을 서술해 주세요.
+                        생활기록부는 초·중·고 학생들의 학교생활 전반을 공식적으로 기록하는 문서로, 대학 입시 및 취업에 매우 중요한 평가 자료입니다.
+                        따라서 교사의 질문이나 명령을 정확히 분석하여, 적절한 SQLite 쿼리를 생성해야 합니다.
 
-                        특히, 다음 사항을 주의 깊게 고려하세요:
-                        - 날짜(정확한 날짜, 연도, 학기): 연도와 학기로 질의가 들어온 경우 범위를 통해 해당 날짜가 그 범위에 들어가는지 확인해야합니다.
-                            활동 날짜의 경우 "activity_date"로 확인가능합니다.
-                            ex) 2024년 1학기는 날짜로 2024-03-01에서 2024-07-31 사이의 값입니다.
-                        - 활동 유형 (예: 동아리 활동, 자율 활동, 진로 활동, 특기 적성)
-                        - 특정 동아리명 (예: 피타고라스)
-                        - 학생 개인 혹은 그룹 대상 여부
+                        ---
 
-                        아래는 데이터베이스 스키마입니다:
+                        **당신의 작업 순서:**
+                        1. 사용자 질문 또는 명령을 분석합니다.
+                        2. 필요한 조건(학년, 학기, 활동 유형, 동아리명, 과목명 등)을 단계별로 추출하고 논리적으로 정리합니다.
+                        3. 정확하고 완전한 SQLite 쿼리를 작성합니다.
+
+                        ---
+
+                        **쿼리 작성 시 유의사항:**
+                        - 반드시 쿼리 결과에 학생 정보(`student.student_id`, `student.student_name`)를 포함해야 합니다.
+                        - 활동 유형을 포함하고 그 유형에 따라 추가 정보 포함:
+                            - 활동 유형이 '동아리활동'인 경우 `club_name` 및 `club_description` 반드시 포함해야 합니다.
+                            - 이 때 activity에서 club으로의 접근은 Foreign key인 club_id를 활용합니다.
+                        - `activity_description`(활동 설명)은 항상 포함해야 합니다.
+                        - 질문에 특정 동아리명(예: '피타고라스')이 포함된 경우, 해당 동아리에 한정해야 합니다.
+                        - 활동의 대상이 개인인지 그룹인지도 고려해야 합니다.
+                        - 날짜 조건이 있는 경우:
+                            - `activity_date`를 기준으로 필터링.
+                            - 예) 2024년 1학기 → `2024-03-01` ~ `2024-07-31` 범위로 간주.
+
+                        ---
+
+                        **데이터베이스 스키마:**
                         {DATABASE_SCHEMA}
 
-                        아래는 예시 질문 및 쿼리입니다:
+                        ---
+
+                        **예시 질문 및 쿼리:**
                         {FEWSHOTS}
 
-                        사용자 질문 혹은 명령:
+                        ---
+
+                        **사용자 질문 또는 명령:**
                         {QUESTION}
 
-                        힌트:
                         {HINT}
 
-                        최종 결과는 다음 JSON 형태로 출력하세요:
+                        ---
 
+                        **최종 출력 형식 (JSON):**
                         {{
-                        "chain_of_thought_reasoning": "당신이 최종 SQL 쿼리를 작성하기 위해 분석한 단계별 사고 과정",
-                        "SQL": "최종 작성한 SQLite 쿼리문"
+                        "chain_of_thought_reasoning": "최종 SQL 쿼리를 만들기 위한 당신의 단계별 사고 과정",
+                        "SQL": "작성한 최종 SQLite 쿼리"
                         }}
 
-                        질문에 맞는 정확하고 완전한 쿼리를 단계별로 신중하게 작성해 주세요.
+                        위 규칙에 따라 신중하게 생각을 전개하고 정확한 SQL을 작성하세요.
                         """
+
 
     prompt = prompt_template.format(
         DATABASE_SCHEMA=schema_info,
         QUESTION=user_question,
         HINT="",  # 필요시 힌트 추가 가능
-        FEWSHOTS="",
+        FEWSHOTS=fewshots_text,
     )
 
     response = llm.chat.completions.create(
@@ -161,28 +177,34 @@ def generate_filtered_schema(input_file, used_columns=None, include_descriptions
         else:
             table_columns = table["column"]
 
-        output_lines.append(f"테이블명: {table_name}")
+        output_lines.append(f"\n📘 테이블: {table_name}")
 
         for col in table_columns:
             col_name = col["column_name"]
             is_pk = col["PK"] == 1
-            fk = col["FK"]
+            fk = col.get("FK")  # ← 여기만 방어적으로 수정
             desc = col.get("description", None)
 
+            # 컬럼 정보 라인 구성
+            col_line = f" - 컬럼: {col_name}"
             if is_pk:
-                output_lines.append(f"- 컬럼 (PK): {col_name}")
-            elif fk:
-                output_lines.append(f"- 컬럼 (FK): {col_name}")
-            else:
-                output_lines.append(f"- 컬럼: {col_name}")
+                col_line += " (PK)"
+            elif isinstance(fk, dict):  # FK일 때만 명확하게 표시
+                ref_table = fk.get("table")
+                ref_column = fk.get("column")
+                col_line += f" (FK → {ref_table}.{ref_column})"
 
+            output_lines.append(col_line)
+
+            # 설명 포함
             if include_descriptions and desc:
                 cleaned = desc.strip().lstrip("#").strip()
-                output_lines.append(f"  - 설명: {cleaned}")
+                output_lines.append(f"    • 설명: {cleaned}")
 
-        output_lines.append("")
+        output_lines.append("")  # 테이블 끝 간격
 
     return "\n".join(output_lines)
+
 
 
 
