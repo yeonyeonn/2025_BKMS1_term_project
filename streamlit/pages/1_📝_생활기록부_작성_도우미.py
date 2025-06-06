@@ -1,8 +1,14 @@
 import streamlit as st
 import sqlite3
+import os
 import sys
+import pandas as pd
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 import json
 from pathlib import Path
+from QAchatbot_BE.rag_favorite_db import init_favorites_db, save_favorite, get_favorites, delete_favorite
+
+
 
 # 경로 설정
 base_path = Path(__file__).resolve().parents[2] / "lifeRecord"
@@ -18,9 +24,9 @@ conn = sqlite3.connect(str(db_path))
 cursor = conn.cursor()
 
 # Streamlit UI
-st.title("생활기록부 생성기")
+st.title("생활기록부 작성 도우미")
 
-user_query = st.text_input("학생 정보에 대해 알고 싶은 내용을 자연어로 입력하세요:")
+user_query = st.text_input("생활기록부에 작성하고자 하는 내용을 자연어로 입력하세요:")
 
 # 세션 상태 초기화
 if "life_record_candidates" not in st.session_state:
@@ -52,7 +58,8 @@ if st.button("생활기록부 생성"):
             sql_query = result.get("SQL", "")
 
             st.session_state.reasoning_cache = reasoning
-            st.markdown("### 🧠 사고 과정 (Chain of Thought Reasoning)")
+            st.markdown("---")
+            st.markdown("#### 🧠 AI 도우미의 사고 과정(Chain of Thought Reasoning)")
             st.write(reasoning)
 
             if not sql_query:
@@ -78,7 +85,7 @@ if st.button("생활기록부 생성"):
 
 # SQL 수정 후 재실행 UI
 if st.session_state.last_failed_sql:
-    st.markdown("### ⚠️ SQL 실행 실패 - 직접 수정해서 다시 시도해보세요.")
+    st.markdown("#### ⚠️ SQL 실행 실패 - 직접 수정해서 다시 시도해보세요.")
     modified_sql = st.text_area("수정된 SQL 쿼리 입력:", value=st.session_state.last_failed_sql)
 
     if st.button("쿼리 다시 실행"):
@@ -156,9 +163,11 @@ if st.session_state.get("student_data"):
         })
 
     # 병합된 데이터 보기 (옵션)
-    st.markdown("### 🧾 병합된 학생별 동아리 활동 데이터")
+    st.markdown("### 🧾 학생별 활동 데이터")
     st.success(f"총 **{len(merged_student_data)}명**의 학생 데이터가 병합되어 조회되었습니다.")
     st.json(merged_student_data)
+    # df = pd.DataFrame(merged_student_data)  # 병합된 데이터를 데이터프레임으로 변환
+    # st.dataframe(df, use_container_width=True)
 
     # 3. 후보 생성: 학생 단위로 3개씩 생성, 동아리별 묶음 같이 전달
     if (
@@ -206,6 +215,32 @@ if st.session_state.get("student_data"):
                 key=f"selected_{unique_key}"
             )
 
+            st.markdown("---")
             st.write("✅ 선택된 문장:")
-            st.write(selected)
+            # st.write(selected)
+            st.markdown(
+            f"<div style='background-color:#e5f8e3;padding:15px;border-radius:10px;border:2px;font-size:16px;color:black;'>{selected}</div>",
+            unsafe_allow_html=True
+        )
 
+
+# 즐겨찾기
+favorites = get_favorites()
+selected_fav = st.sidebar.selectbox("⭐ 즐겨찾기한 Q&A", favorites, format_func=lambda row: row[1])
+
+if selected_fav:
+    fav_id = selected_fav[0]
+    conn = sqlite3.connect("favorites.db")
+    c = conn.cursor()
+    c.execute("SELECT question, answer FROM favorites WHERE id = ?", (fav_id,))
+    q, a = c.fetchone()
+    conn.close()
+
+    with st.sidebar.expander("📌 저장된 답변 보기", expanded=False):
+        st.markdown(f"**Q. {q}**")
+        st.markdown(f"**A.** {a}")
+
+        if st.button("🗑️ 삭제하기", key=f"delete_{fav_id}"):
+            delete_favorite(fav_id)
+            st.toast("🗑️ 즐겨찾기가 삭제되었습니다.")
+            st.rerun()
