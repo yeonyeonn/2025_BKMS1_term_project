@@ -23,7 +23,7 @@ def build_vector_db(pdf_path: str, persist_path: str):
     documents = loader.load()
 
     print("******* 텍스트 청크 분할 중...")
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     split_docs = splitter.split_documents(documents)
     print(f"******* 총 {len(documents)}쪽 로드됨, {len(split_docs)}개의 청크로 분할됨")
 
