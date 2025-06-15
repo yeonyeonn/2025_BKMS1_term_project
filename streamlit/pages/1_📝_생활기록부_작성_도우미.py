@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 import json
 from pathlib import Path
 from QAchatbot_BE.rag_favorite_db import init_favorites_db, save_favorite, get_favorites, delete_favorite
-
+import streamlit.components.v1 as components
 
 
 # 경로 설정
@@ -41,7 +41,7 @@ if "reasoning_cache" not in st.session_state:
     st.session_state.reasoning_cache = ""
 
 # "생활기록부 생성" 버튼 클릭 시 처리
-if st.button("생활기록부 생성"):
+if st.button("생성하기"):
     if user_query.strip():
         st.session_state.life_record_candidates = {}
         st.session_state.student_data = None
@@ -110,8 +110,9 @@ if st.session_state.last_failed_sql:
 # ✅ 항상 학생 데이터 표시
 
 # 1. 조회된 원본 데이터 출력
-#if st.session_state.get("student_data"):
-#    st.markdown("### 📊 조회된 데이터")
+if st.session_state.get("student_data"):
+    st.markdown("### 📊 조회된 데이터")
+    st.json(st.session_state.get("student_data"))
 #    st.markdown(f"- 총 **{len(st.session_state.student_data)}개**의 데이터가 조회되었습니다.")
 
 # 2. 학생 단위로 동아리 활동 병합
@@ -194,15 +195,28 @@ if st.session_state.get("student_data"):
 
         for idx, student_info in enumerate(merged_student_data):
             student_id = student_info.get("student_name") or student_info.get("student_id") or str(idx)
-            unique_key = f"{student_id}_{idx}"  # 유일한 key 생성
+            unique_key = f"{student_id}_{idx}"
 
             options = st.session_state.life_record_candidates.get(f"{student_id}", [])
 
-            # ✅ 학생 구역 헤더 강조 (HTML 사용 가능)
+            # 학생 헤더
             st.markdown(
                 f"""
-                <div style='margin-top: 2em; margin-bottom: 0.5em; padding: 0.5em; background-color: #f0f2f6; border-left: 5px solid #4CAF50;'>
-                    <h4 style='margin: 0; color: black;'>  <b>{student_info.get("student_name", "이름 없음")}</b> ({student_info.get("student_id", "")})</h4>
+                <div style="
+                    margin-top: 3em; 
+                    margin-bottom: 1em; 
+                    padding: 10px 16px; 
+                    background-color: #333; 
+                    color: white; 
+                    border-radius: 10px;
+                    font-family: 'Apple SD Gothic Neo', sans-serif;
+                ">
+                    <h4 style="margin: 0; font-weight: bold;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#D4AF37" viewBox="0 0 24 24" style="vertical-align: middle; margin-right: 6px;">
+  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+</svg> 
+                        {student_info.get("student_name", "이름 없음")} ({student_info.get("student_id", "")})
+                    </h4>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -215,13 +229,55 @@ if st.session_state.get("student_data"):
                 key=f"selected_{unique_key}"
             )
 
-            st.markdown("---")
-            st.write("✅ 선택된 문장:")
-            # st.write(selected)
-            st.markdown(
-            f"<div style='background-color:#e5f8e3;padding:15px;border-radius:10px;border:2px;font-size:16px;color:black;'>{selected}</div>",
-            unsafe_allow_html=True
+            # ✅ 선택된 문장과 복사 버튼 함께 표시
+            components.html(
+            f"""
+            <div style="border-radius:10px; overflow:hidden; font-family: 'Apple SD Gothic Neo', sans-serif; border:2px solid #D4AF37; margin-bottom:24px;">
+
+                <!-- 상단바 -->
+                <div style="background-color:#333; color:white; padding:10px 16px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:17px; font-weight:bold;">
+                        📋 선택된 문장
+                    </div>
+                    <!-- 복사 버튼 및 복사 완료 메시지 -->
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button id="copyBtn" 
+                            onclick="
+                                navigator.clipboard.writeText(document.getElementById('copyText_{unique_key}').innerText);
+                                const msg = document.getElementById('copyMsg');
+                                msg.style.opacity = 1;
+                                setTimeout(() => msg.style.opacity = 0, 1500);
+                            "
+                            style="background-color:#ddd; color:#333; font-size:14px; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">
+                            Copy
+                        </button>
+                        <span id="copyMsg" style="color:#4CAF50; font-weight:bold; opacity:0; transition: opacity 0.3s;">Copied</span>
+                    </div>
+                </div>
+
+                <!-- 본문 영역 -->
+                <div style="background-color:#fff8e7; padding:20px 24px 20px 24px;">
+                    <div id="copyText_{unique_key}" style="
+                        font-size:16px;
+                        color:#222;
+                        margin:0;
+                        padding:0;
+                        white-space: normal;
+                        word-break: break-word;
+                        text-align:left;
+                        line-height:1.6;
+                    ">
+                        {selected}
+                    </div>
+                </div>
+            </div>
+            """,
+            height=250,
         )
+
+
+            #st.markdown("---")
+
 
 
 # 즐겨찾기
